@@ -18,7 +18,7 @@ export default {
     },
     methods: {
         completeAllTodos (event) {
-            this.$store.dispatch('checkAll', event);
+            this.$store.dispatch('checkAll', event.target.checked);
         }
     }
 }

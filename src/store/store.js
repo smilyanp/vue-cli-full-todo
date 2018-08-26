@@ -1,26 +1,19 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import db from '../firebase';
 
 Vue.use(Vuex);
 
 export const store = new Vuex.Store({
+
+    // THE STATE
     state: {
         activeFilter: 'all',
-        todos: [
-            {
-              'id': 1,
-              'title': 'First to do for the day',
-              'completed': false,
-              'editing': false,
-            },
-            {
-              'id': 2,
-              'title': 'Second to do for the day',
-              'completed': false,
-              'editing': false,
-            }
-        ]
+        loading: true,
+        todos: []
     },
+
+    // GETTING DATA FROM THE STATE
     getters: {
         remaining (state) {
             return state.todos.filter(todo => !todo.completed).length;
@@ -29,7 +22,6 @@ export const store = new Vuex.Store({
             return state.todos.filter((todo) => todo.completed).length;
         },
         anyRemaining (state, getters) {
-            console.log(getters.remaining);
             return getters.remaining > 0;
         },
         showClearCompletedBtn (state, getters) {
@@ -51,7 +43,12 @@ export const store = new Vuex.Store({
           }
         }
     },
+
+    // UPDATING THE STATE
     mutations: {
+        fetchTodos(state, todos) {
+            state.todos = todos;
+        },
         addTodo(state, todo) {
             state.todos.push({
                 id: todo.id,
@@ -60,13 +57,7 @@ export const store = new Vuex.Store({
                 editing: false
             });
         },
-        clearCompleted(state) {
-            state.todos = state.todos.filter((todo) => !todo.completed);
-        },
-        changeFilter(state, filter) {
-            state.activeFilter = filter;
-        },
-        doneEdit(state, todo) {
+        updateTodo(state, todo) {
             const index = state.todos.findIndex(item => item.id == todo.id);
             state.todos.splice(index, 1, todo);
         },
@@ -74,28 +65,120 @@ export const store = new Vuex.Store({
             const index = state.todos.findIndex(item => item.id == id);
             state.todos.splice(index, 1);
         },
-        checkAll(state, event) {
-            state.todos = state.todos.filter((todo) => todo.completed = event.target.checked);
+        clearCompleted(state) {
+            state.todos = state.todos.filter(todo => !todo.completed);
+        },
+        changeFilter(state, filter) {
+            state.activeFilter = filter;
+        },
+        checkAll(state, checked) {
+            state.todos.forEach(todo => (todo.completed = checked));
         }
     },
+
+    // AJAX
     actions: {
+        fetchTodos(context) {
+            context.state.loading = true;
+
+            db.collection('todos').get()
+                .then(quierySnapshot => {
+                    let todos = [];
+                    quierySnapshot.forEach(doc => {
+                        todos.push({
+                            id: doc.id,
+                            title: doc.data().title,
+                            completed: doc.data().completed,
+                            timestamp: doc.data().timestamp
+                        });
+                    });
+
+                    const todosSorted = todos.sort((a, b) => {
+                        return a.timestamp.seconds - b.timestamp.seconds;
+                    });
+
+                    context.commit('fetchTodos', todosSorted);
+                    context.state.loading = false;
+                })
+                .catch(error => {
+                    console.log(error);
+                });
+        },
         addTodo(context, todo) {
-            context.commit('addTodo', todo);
+            context.state.loading = true;
+
+            db.collection('todos').add({
+                title: todo.title,
+                completed: false,
+                timestamp: new Date()
+            })
+            .then(docRef => {
+                context.commit('addTodo', {
+                    id: docRef.id,
+                    title: todo.title,
+                    completed: false
+                });
+                context.state.loading = false;
+            })
+            .catch(error => {
+                console.log(error);
+            });
+        },
+        removeTodo(context, id) {
+            context.state.loading = true;
+
+            db.collection('todos').doc(id).delete()
+                .then(() => {
+                    context.commit('removeTodo', id);
+                    context.state.loading = false;
+                });
+        },
+        updateTodo(context, todo) {
+            context.state.loading = true;
+
+            db.collection('todos').doc(todo.id).set({
+                    id: todo.id,
+                    title: todo.title,
+                    completed: todo.completed,
+                    timestamp: new Date()
+                })
+                .then(() => {
+                    context.commit('updateTodo', todo);
+                    context.state.loading = false;
+                })
         },
         clearCompleted(context) {
-            context.commit('clearCompleted');
+            context.state.loading = true;
+
+            db.collection('todos').where('completed', '==', true).get()
+                .then(querySnapshot => {
+                    querySnapshot.forEach(doc => {
+                        doc.ref.delete()
+                            .then(() => {
+                                context.commit('clearCompleted');
+                                context.state.loading = false;
+                            });
+                    });
+                });
         },
         changeFilter(context, filter) {
             context.commit('changeFilter', filter);
         },
-        doneEdit(context, todo) {
-            context.commit('doneEdit', todo);
-        },
-        removeTodo(context, id) {
-            context.commit('removeTodo', id);
-        },
-        checkAll(context, event) {
-            context.commit('checkAll', event);
+        checkAll(context, checked) {
+            context.state.loading = true;
+
+            db.collection('todos').get()
+            .then(querySnapshot => {
+                querySnapshot.forEach(doc => {
+                    doc.ref.update({
+                        completed: checked
+                    })
+                    .then(() => {
+                        context.commit('checkAll', checked);
+                        context.state.loading = false;
+                    });
+                });
+            })
         }
     }
 });

@@ -36,7 +36,7 @@
         <transition-group name="fade" enter-active-class="animated fadeInDown" leave-active-class="animated fadeOutRight">
           <todo-item 
             v-for="(todo, index) in todosFiltered" 
-            :key="todo.id" 
+            :key="index" 
             :todo="todo" 
             :index="index" 
             :checkAll="!anyRemaining" />
@@ -44,6 +44,11 @@
       </b-list-group>
     </div>
 
+    <div class="loading-overlay" v-if="$store.state.loading">
+      <div class="lds-ring">
+        <div></div><div></div><div></div><div></div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -62,6 +67,11 @@ export default {
     TodoCheckAll,
     TodoFilters,
     TodoClearCompleted
+  },
+  created() {
+    fetchTodos: {
+      this.$store.dispatch('fetchTodos');
+    }
   },
   data () {
     return {
@@ -127,4 +137,55 @@ export default {
 .controls label {
   margin-bottom: 0;
 }
+
+/* Loading overlay */
+.loading-overlay {
+  background: rgba(255, 255, 255, 0.5);
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  padding-top: 15%;
+}
+
+/* Spinner */
+.lds-ring {
+  display: block;
+  margin: 10px auto;
+  position: relative;
+  width: 64px;
+  height: 64px;
+}
+.lds-ring div {
+  box-sizing: border-box;
+  display: block;
+  position: absolute;
+  width: 51px;
+  height: 51px;
+  margin: 6px;
+  border: 6px solid #646464;
+  border-radius: 50%;
+  animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  border-color: #646464 transparent transparent transparent;
+}
+.lds-ring div:nth-child(1) {
+  animation-delay: -0.45s;
+}
+.lds-ring div:nth-child(2) {
+  animation-delay: -0.3s;
+}
+.lds-ring div:nth-child(3) {
+  animation-delay: -0.15s;
+}
+@keyframes lds-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+
 </style>

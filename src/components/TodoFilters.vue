@@ -2,21 +2,21 @@
     <div>
         <button 
           class="btn btn-light" 
-          :class="{ active : filter == 'all'}" 
+          :class="{ active : activeFilter == 'all'}" 
           @click="changeFilter('all')">
             All
         </button>
 
         <button 
           class="btn btn-light" 
-          :class="{ active : filter == 'active'}" 
+          :class="{ active : activeFilter == 'active'}" 
           @click="changeFilter('active')">
             Active
         </button>
 
         <button 
           class="btn btn-light" 
-          :class="{ active : filter == 'completed'}" 
+          :class="{ active : activeFilter == 'completed'}" 
           @click="changeFilter('completed')">
           Completed
         </button>
@@ -27,13 +27,13 @@
 export default {
     name: 'todo-filters',
     computed: {
-      filter() {
+      activeFilter() {
         return this.$store.state.activeFilter;
       }
     },
     methods: {
-      changeFilter(filter) {
-        this.$store.dispatch('changeFilter', filter);
+      changeFilter(activeFilter) {
+        this.$store.dispatch('changeFilter', activeFilter);
       }
     }
 }

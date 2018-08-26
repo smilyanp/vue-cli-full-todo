@@ -6,7 +6,7 @@
             <input 
               type="checkbox" 
               v-model="completed" 
-              @change="doneEdit" />
+              @change="updateTodo" />
           </div>
 
           <div class="col-md-7 center-column">
@@ -23,8 +23,8 @@
               v-else 
               v-focus 
               v-model="title" 
-              @blur="doneEdit" 
-              @keyup.enter="doneEdit"
+              @blur="updateTodo" 
+              @keyup.enter="updateTodo"
               @keyup.esc="cancelEdit"
               type="text" 
               class="form-control" />
@@ -92,12 +92,12 @@ export default {
             this.beforeEditCache = this.title;
             this.editing = true;
         },
-        doneEdit () {
+        updateTodo () {
           if (this.title.trim().length === 0) {
               return;
           }
           this.editing = false;
-          this.$store.dispatch('doneEdit', {
+          this.$store.dispatch('updateTodo', {
               'id': this.id,
               'title': this.title,
               'completed': this.completed,
