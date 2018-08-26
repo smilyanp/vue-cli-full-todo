@@ -31,7 +31,7 @@
           </div>
 
           <div class="col-md-4 text-right">
-            <b-button size="sm" variant="danger" @click="removeTodo(index)">
+            <b-button size="sm" variant="danger" @click="removeTodo(id)">
               <font-awesome-icon icon="trash" />
             </b-button>
           </div>
@@ -81,8 +81,8 @@ export default {
         }
     },
     methods: {
-        removeTodo(index) {
-            eventBus.$emit('removedTodo', index);
+        removeTodo(id) {
+          this.$store.dispatch('removeTodo', id);
         },
         cancelEdit () {
           this.editing = false;
@@ -93,19 +93,16 @@ export default {
             this.editing = true;
         },
         doneEdit () {
-            if (this.title.trim().length === 0) {
-                return;
-            }
-            this.editing = false;
-            eventBus.$emit('finishedEdit', {
-                'index': this.index,
-                'todo': {
-                    'id': this.id,
-                    'title': this.title,
-                    'completed': this.completed,
-                    'editing': this.editing
-                }
-            });
+          if (this.title.trim().length === 0) {
+              return;
+          }
+          this.editing = false;
+          this.$store.dispatch('doneEdit', {
+              'id': this.id,
+              'title': this.title,
+              'completed': this.completed,
+              'editing': this.editing
+          });
         },
     }
 }

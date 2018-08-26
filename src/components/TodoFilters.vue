@@ -26,16 +26,15 @@
 <script>
 export default {
     name: 'todo-filters',
-    data() {
-        return {
-            'filter': 'all'
-        }
+    computed: {
+      filter() {
+        return this.$store.state.activeFilter;
+      }
     },
     methods: {
-        changeFilter(filter) {
-            this.filter = filter;
-            eventBus.$emit('filterChanged', this.filter);
-        }
+      changeFilter(filter) {
+        this.$store.dispatch('changeFilter', filter);
+      }
     }
 }
 </script>
