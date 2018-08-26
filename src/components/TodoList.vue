@@ -66,44 +66,14 @@
     <div class="todos-list">
       <b-list-group>
         <transition-group name="fade" enter-active-class="animated fadeInDown" leave-active-class="animated fadeOutRight">
-          <b-list-group-item v-for="(todo, index) in todosFiltered" :key="todo.id" class="todo-item">
-            <div class="row">
-              
-              <div class="col-md-1 center-column">
-                <input 
-                  type="checkbox" 
-                  v-model="todo.completed" />
-              </div>
-
-              <div class="col-md-7 center-column">
-                
-                <div 
-                  v-if="!todo.editing" 
-                  @dblclick="editTodo(todo)" 
-                  class="todo-title" 
-                  :class="{ completed : todo.completed }">
-                    {{ todo.title }}
-                </div>
-
-                <input 
-                  v-else 
-                  v-focus 
-                  v-model="todo.title" 
-                  @blur="doneEdit(todo)" 
-                  @keyup.enter="doneEdit(todo)"
-                  @keyup.esc="cancelEdit(todo)"
-                  type="text" 
-                  class="form-control" />
-              </div>
-
-              <div class="col-md-4 text-right">
-                <b-button size="sm" variant="danger" @click="removeTodo(index)">
-                  <font-awesome-icon icon="trash" />
-                </b-button>
-              </div>
-
-            </div>
-          </b-list-group-item>
+          <todo-item 
+            v-for="(todo, index) in todosFiltered" 
+            :key="todo.id" 
+            :todo="todo" 
+            :index="index" 
+            :checkAll="!anyRemaining" 
+            @removedTodo="removeTodo" 
+            @finishedEdit="finishedEdit" />
         </transition-group>
       </b-list-group>
     </div>
@@ -112,8 +82,13 @@
 </template>
 
 <script>
+import TodoItem from './TodoListItem';
+
 export default {
   name: 'todo-list',
+  components: {
+    TodoItem
+  },
   data () {
     return {
       newTodo: '',
@@ -165,13 +140,6 @@ export default {
       }
     }
   },
-  directives: {
-    focus: {
-      inserted: function (el) {
-        el.focus()
-      }
-    }
-  },
   methods: {
     addTodo () {
       if (this.newTodo.trim().length === 0) {
@@ -186,20 +154,6 @@ export default {
       this.newTodo = '';
       this.idForTodo++;
     },
-    editTodo (todo) {
-      this.beforeEditCache = todo.title;
-      todo.editing = true;
-    },
-    doneEdit (todo) {
-      if (todo.title.trim().length === 0) {
-        return;
-      }
-      todo.editing = false;
-    },
-    cancelEdit (todo) {
-      todo.editing = false;
-      todo.title = this.beforeEditCache;
-    },
     removeTodo (index) {
       this.todos.splice(index, 1);
     },
@@ -208,6 +162,9 @@ export default {
     },
     clearCompleted (event) {
       this.todos = this.todos.filter((todo) => !todo.completed);
+    },
+    finishedEdit (data) {
+      this.todos.splice(data.index, 1, data.todo);
     }
   }
 }
