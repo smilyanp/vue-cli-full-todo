@@ -82,7 +82,7 @@ export default {
     },
     methods: {
         removeTodo(index) {
-            this.$emit('removedTodo', index);
+            eventBus.$emit('removedTodo', index);
         },
         cancelEdit () {
           this.editing = false;
@@ -97,7 +97,7 @@ export default {
                 return;
             }
             this.editing = false;
-            this.$emit('finishedEdit', {
+            eventBus.$emit('finishedEdit', {
                 'index': this.index,
                 'todo': {
                     'id': this.id,
