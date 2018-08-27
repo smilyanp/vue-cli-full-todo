@@ -11,7 +11,7 @@
 
     <div class="row controls">
 
-      <div class="col-md-2 center-column">
+      <div class="col-md-3 center-column">
         <todo-check-all></todo-check-all>
       </div>
 

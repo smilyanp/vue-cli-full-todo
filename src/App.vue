@@ -1,5 +1,5 @@
 <template>
-  <div id="app" class="container">
+  <div>
     <todo-list></todo-list>
   </div>
 </template>
@@ -16,13 +16,5 @@ export default {
 </script>
 
 <style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  color: #2c3e50;
-  margin-top: 20px;
-}
-.container {
-  max-width: 700px;
-  margin: 0 auto;
-}
+
 </style>

@@ -1,6 +1,6 @@
 import Vue from 'vue';
+import VueRouter from 'vue-router';
 import BootstrapVue from "bootstrap-vue";
-import App from './App';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
@@ -10,19 +10,34 @@ import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 import { store } from './store/store';
+import routes from './routes';
 
-window.eventBus = new Vue();
+import Master from './components/layouts/Master';
 
-library.add(faTrash)
-Vue.component('font-awesome-icon', FontAwesomeIcon)
+// Third-parties used
+Vue.use(BootstrapVue);
+Vue.use(VueRouter);
 
-Vue.use(BootstrapVue)
+// Font-awesome icons
+library.add(faTrash);
+Vue.component('font-awesome-icon', FontAwesomeIcon);
 
-Vue.config.productionTip = false
+// Events bus
+// window.eventBus = new Vue();
 
+Vue.config.productionTip = false;
+
+// Router
+const router = new VueRouter({
+    routes,
+    mode: 'history'
+});
+
+// Init app
 new Vue({
   el: '#app',
   store: store,
-  template: '<App/>',
-  components: { App }
+  router: router,
+  template: '<Master/>',
+  components: { Master }
 })
